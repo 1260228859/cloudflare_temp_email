@@ -27,6 +27,8 @@ async function email(message: ForwardableEmailMessage, env: Bindings, ctx: Execu
         console.log(`Failed save message from ${message.from} to ${message.to}`);
     }
 
+    //保存到阿里云
+    
     // forward email
     try {
         const forwardAddressList = getEnvStringList(env.FORWARD_ADDRESS_LIST)
@@ -38,26 +40,26 @@ async function email(message: ForwardableEmailMessage, env: Bindings, ctx: Execu
     }
 
     // send email to telegram
-    try {
-        await sendMailToTelegram(
-            { env: env } as Context<HonoCustomType>,
-            message.to, rawEmail, message_id);
-    } catch (error) {
-        console.log("send mail to telegram error", error);
-    }
+    // try {
+    //     await sendMailToTelegram(
+    //         { env: env } as Context<HonoCustomType>,
+    //         message.to, rawEmail, message_id);
+    // } catch (error) {
+    //     console.log("send mail to telegram error", error);
+    // }
 
     // send webhook
-    try {
-        await triggerWebhook(
-            { env: env } as Context<HonoCustomType>,
-            message.to, rawEmail, message_id
-        );
-    } catch (error) {
-        console.log("send webhook error", error);
-    }
+    // try {
+    //     await triggerWebhook(
+    //         { env: env } as Context<HonoCustomType>,
+    //         message.to, rawEmail, message_id
+    //     );
+    // } catch (error) {
+    //     console.log("send webhook error", error);
+    // }
 
-    // auto reply email
-    await auto_reply(message, env);
+    // auto 自动回复
+    // await auto_reply(message, env);
 }
 
 export { email }
