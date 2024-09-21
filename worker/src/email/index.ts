@@ -1,11 +1,11 @@
 import { Context } from "hono";
-
 import { getEnvStringList } from "../utils";
 import { sendMailToTelegram } from "../telegram_api";
 import { Bindings, HonoCustomType } from "../types";
 import { auto_reply } from "./auto_reply";
 import { isBlocked } from "./black_list";
 import { triggerWebhook } from "../common";
+import { createConnection } from "../db"
 
 
 async function email(message: ForwardableEmailMessage, env: Bindings, ctx: ExecutionContext) {
@@ -27,8 +27,23 @@ async function email(message: ForwardableEmailMessage, env: Bindings, ctx: Execu
         console.log(`Failed save message from ${message.from} to ${message.to}`);
     }
 
-    //保存到阿里云
-    
+    // save email to Aliyun RDS
+    try {
+        const connection = await createConnection();
+        const [result] = await connection.execute(
+            `INSERT INTO raw_mails (source, address, raw, message_id) VALUES (?, ?, ?, ?)`,
+            [message.from, message.to, rawEmail, message_id]
+        );
+        await connection.end();
+
+        if ((result as any).affectedRows === 0) {
+            console.log(`Failed save message to Aliyun RDS from ${message.from} to ${message.to}`);
+        }
+    } catch (error) {
+        message.setReject(`Failed save message to ${message.to}`);
+        console.log(`Error saving email to Aliyun RDS: ${message.from} to ${message.to} error ${error}`);
+    }
+
     // forward email
     try {
         const forwardAddressList = getEnvStringList(env.FORWARD_ADDRESS_LIST)

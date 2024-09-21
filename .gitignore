@@ -136,3 +136,4 @@ dist
 wrangler.toml
 .dev.vars
 pnpm-lock.yaml
+db.ts
